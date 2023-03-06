@@ -253,7 +253,7 @@ def update_queue(queue, k):
 momentum_step(m=0)
 
 # Dataset initialization
-training_dataset = HDF5Dataset(input_path, "init")
+training_dataset = HDF5Dataset(input_path, "init", approach=APPROACH)
 # classes = np.stack([entry[2] for entry in training_dataset])
 classes = training_dataset._hf[training_dataset.domain_gt_dataset_name][()]
 
