@@ -89,6 +89,7 @@ print("PARAMETERS")
 print("N_EPOCHS: " + str(EPOCHS_str))
 print("CNN used: " + str(CNN_TO_USE))
 print("BATCH_SIZE: " + str(BATCH_SIZE_str))
+print("APPROACH: " + APPROACH)
 
 
 # create folder (used for saving weights)
@@ -131,6 +132,7 @@ batch_size = BATCH_SIZE
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 n_domains = 1 if APPROACH == "binary" else 5
+print(f"n_domains: {n_domains}")
 
 encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=n_domains).to(device)
 momentum_encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=n_domains).to(device)
