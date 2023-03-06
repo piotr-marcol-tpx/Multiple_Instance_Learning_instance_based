@@ -39,7 +39,7 @@ parser.add_argument(
 parser.add_argument('-q', '--MOCO_QUEUE', help='queue size for MoCo algorithm', type=int, default=16384)
 parser.add_argument('-l', '--lr', help='learning rate', type=float, default=1e-4)
 parser.add_argument(
-	'-b', '--BASE_PATH', help='base path', type=str, default='/projects/0/examode/MIT_PP3/MoCo_representation_training'
+	'-p', '--BASE_PATH', help='base path', type=str, default='/projects/0/examode/MIT_PP3/MoCo_representation_training'
 )
 parser.add_argument(
 	'-i', '--H5_INPUT', help='input h5 file name', type=str, default='sampled_dataset.h5'
