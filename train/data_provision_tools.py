@@ -21,6 +21,7 @@ class HDF5Dataset(data.Dataset):
         self.domain_gt_dataset_name = domain_gt_dataset_name
         self.tissue_gt_dataset_name = tissue_gt_dataset_name
         self.length = None
+        self._open_hdf5()
 
         with h5py.File(self.file_path, 'r') as hf:
             self.length = hf[images_dataset_name].shape[0]

@@ -252,7 +252,8 @@ momentum_step(m=0)
 
 # Dataset initialization
 training_dataset = HDF5Dataset(input_path, "init")
-classes = np.stack([entry[2] for entry in training_dataset])
+# classes = np.stack([entry[2] for entry in training_dataset])
+classes = training_dataset._hf[training_dataset.domain_gt_dataset_name][()]
 
 if APPROACH == "binary":
 	sampler = ImbalancedBinarySampler(classes)
