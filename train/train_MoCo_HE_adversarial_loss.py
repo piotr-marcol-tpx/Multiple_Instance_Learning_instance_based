@@ -122,7 +122,7 @@ elif 'mobilenet' in CNN_TO_USE:
 
 
 # moco_dim = 768
-moco_dim = 128
+moco_dim = 512
 moco_m = 0.999
 temperature = 0.07
 

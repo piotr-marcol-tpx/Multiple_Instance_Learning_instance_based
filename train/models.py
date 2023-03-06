@@ -86,7 +86,7 @@ class Encoder(torch.nn.Module):
 
             self.embedding = torch.nn.Linear(in_features=self.fc_feat_in, out_features=self.E)
 
-        self.domain_predictor = DomainPredictor(n_domains, fc_input_features, self.used_cnn)
+        self.domain_predictor = DomainPredictor(n_domains, self.E, self.used_cnn)
         self.prelu = torch.nn.PReLU(num_parameters=1, init=0.25)
 
     def forward(self, x, mode, alpha):
