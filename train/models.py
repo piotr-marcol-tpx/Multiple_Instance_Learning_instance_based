@@ -107,25 +107,29 @@ class Encoder(torch.nn.Module):
         if self.embedding_bool:
             embedding_layer = self.embedding(conv_layers_out)
             embedding_layer = self.prelu(embedding_layer)
-
             features_to_return = embedding_layer
+            normalized_output = torch.nn.functional.normalize(features_to_return, dim=1)
+
+            if mode == "train":
+                reverse_feature = ReverseLayerF.apply(embedding_layer, alpha)
+                output_domain = self.domain_predictor(reverse_feature)
+                return normalized_output, output_domain
+
+            return normalized_output
 
         else:
             features_to_return = conv_layers_out
+            normalized_output = torch.nn.functional.normalize(features_to_return, dim=1)
 
-        normalized_array = torch.nn.functional.normalize(features_to_return, dim=1)
+            if mode == "train":
+                reverse_feature = ReverseLayerF.apply(features_to_return, alpha)
+                output_domain = self.domain_predictor(reverse_feature)
+                return normalized_output, output_domain
 
-        if mode == 'train':
-            reverse_feature = ReverseLayerF.apply(conv_layers_out, alpha)
-
-            output_domain = self.domain_predictor(reverse_feature)
-
-            return normalized_array, output_domain
-
-        return normalized_array
+            return normalized_output
 
 
-#reverse autograd
+# reverse autograd
 class ReverseLayerF(torch.autograd.Function):
 
     @staticmethod

@@ -14,6 +14,7 @@ class HDF5Dataset(data.Dataset):
             images_dataset_name="patches",
             domain_gt_dataset_name="domain_oh",
             tissue_gt_dataset_name="tissue_oh",
+            approach="multiclass"
     ):
         self.file_path = file_path
         self.mode = mode
@@ -21,6 +22,7 @@ class HDF5Dataset(data.Dataset):
         self.domain_gt_dataset_name = domain_gt_dataset_name
         self.tissue_gt_dataset_name = tissue_gt_dataset_name
         self.length = None
+        self.approach = approach
         self._open_hdf5()
 
         with h5py.File(self.file_path, 'r') as hf:
@@ -71,7 +73,10 @@ class HDF5Dataset(data.Dataset):
         # h_e_matrix = torch.FloatTensor(h_e_matrix)
 
         # return k, q, h_e_matrix, domain_oh
-        return k, q, domain_oh
+        if self.approach == "multiclass":
+            return k, q, domain_oh
+        elif self.approach == "binary":
+            return k, q, domain_oh[-1:]
 
 
 class BalancedMultimodalSampler(torch.utils.data.sampler.Sampler):
