@@ -24,19 +24,17 @@ class DomainPredictor(torch.nn.Module):
         self.domain_classifier = torch.nn.Linear(in_features=self.E, out_features=self.n_centers)
 
         self.prelu = torch.nn.PReLU(num_parameters=1, init=0.25)
-        self.softmax = torch.nn.Softmax(dim=1)
+        if self.n_centers > 1:
+            self.activation = torch.nn.Softmax(dim=1)
+        else:
+            self.activation = torch.nn.Sigmoid()
 
     def forward(self, x):
 
         dropout = torch.nn.Dropout(p=0.1)
-
         domain_emb = self.domain_embedding(x)
-
-        # domain_emb = self.prelu(domain_emb)
         domain_emb = dropout(domain_emb)
-
-        domain_prob = self.domain_classifier(domain_emb)
-
+        domain_prob = self.activation(self.domain_classifier(domain_emb))
         return domain_prob
 
 

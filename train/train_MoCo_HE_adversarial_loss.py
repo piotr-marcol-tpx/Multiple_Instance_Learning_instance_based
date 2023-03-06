@@ -39,6 +39,9 @@ parser.add_argument(
 parser.add_argument('-q', '--MOCO_QUEUE', help='queue size for MoCo algorithm', type=int, default=16384)
 parser.add_argument('-l', '--lr', help='learning rate', type=float, default=1e-4)
 parser.add_argument(
+	'-b', '--BASE_PATH', help='base path', type=str, default='/projects/0/examode/MIT_PP3/MoCo_representation_training'
+)
+parser.add_argument(
 	'-i', '--H5_INPUT', help='input h5 file name', type=str, default='sampled_dataset.h5'
 )
 parser.add_argument(
@@ -46,11 +49,7 @@ parser.add_argument(
 	type=str, choices=['binary', 'multiclass'], default='binary'
 )
 parser.add_argument(
-	'-m', '--INPUT_META_FILE', help='name of the input file with images distribution', type=str,
-	default="training_input_images_distribution.csv"
-)
-parser.add_argument(
-	'-o', '--output_folder', help='path where to store the model weights', type=str, default='./models/'
+	'-o', '--output_folder', help='path where to store the model weights', type=str, default='models/'
 )
 
 
@@ -65,11 +64,14 @@ EPOCHS = args.EPOCHS
 EPOCHS_str = str(EPOCHS)
 EMBEDDING_bool = args.features
 lr = args.lr
-OUTPUT_FOLDER = args.output_folder
 APPROACH = args.APPROACH
-csv_bag_filename = args.INPUT_META_FILE
-input_filename = args.H5_INPUT
 num_keys = args.MOCO_QUEUE
+
+base_path = args.BASE_PATH
+OUTPUT_FOLDER = args.output_folder
+OUTPUT_FOLDER = os.path.join(base_path, OUTPUT_FOLDER)
+input_filename = args.H5_INPUT
+input_path = os.path.join(base_path, input_filename)
 dataloader_num_workers = 2
 
 if EMBEDDING_bool == 'True':
@@ -128,8 +130,10 @@ batch_size = BATCH_SIZE
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=5).to(device)
-momentum_encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=5).to(device)
+n_domains = 1 if APPROACH == "binary" else 5
+
+encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=n_domains).to(device)
+momentum_encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=n_domains).to(device)
 
 encoder.embedding.weight.data.normal_(mean=0.0, std=0.01)
 encoder.embedding.bias.data.zero_()
@@ -247,11 +251,11 @@ def update_queue(queue, k):
 momentum_step(m=0)
 
 # Dataset initialization
-training_dataset = HDF5Dataset(input_filename, "init")
+training_dataset = HDF5Dataset(input_path, "init")
 classes = np.stack([entry[3] for entry in training_dataset])
 
 if APPROACH == "binary":
-	sampler = BalancedBinarySampler(classes)
+	sampler = ImbalancedBinarySampler(classes)
 elif APPROACH == "multiclass":
 	sampler = BalancedMultimodalSampler(classes)
 
@@ -347,7 +351,8 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 			x_k = x_k[idx]
 
 		# x_q, x_k : (N, 3, 64, 64)
-		x_q, x_k, he_staining = x_q.to(device), x_k.to(device), he_staining.type(torch.FloatTensor).to(device)
+		# x_q, x_k, he_staining = x_q.to(device), x_k.to(device), he_staining.type(torch.FloatTensor).to(device)
+		x_q, x_k, domain_oh = x_q.to(device), x_k.to(device), domain_oh.type(torch.FloatTensor).to(device)
 
 		q, he_q = encoder(x_q, "train", alpha)  # q : (N, 128)
 		with torch.no_grad():
@@ -381,7 +386,8 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 		loss_moco = criterion(logits, labels)
 		"""
 		loss_moco = loss_function(q, k, queue)
-		loss_domains = lambda_val * criterion_domain(he_q, he_staining)
+		# loss_domains = lambda_val * criterion_domain(he_q, he_staining)
+		loss_domains = lambda_val * criterion_domain(he_q, domain_oh)
 
 		loss = loss_moco + loss_domains
 
