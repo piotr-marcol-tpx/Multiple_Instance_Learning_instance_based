@@ -305,7 +305,7 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 
 	print(f"\nInitializing a queue with {num_keys} keys.")
 
-	queue = torch.Tensor()
+	queue = torch.Tensor().to(device)
 
 	# change data processing mode, see H5Dataset
 	training_iterator._dataset.mode = "queue_building"
