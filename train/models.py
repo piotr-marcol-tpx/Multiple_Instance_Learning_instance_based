@@ -112,7 +112,8 @@ class Encoder(torch.nn.Module):
 
             if mode == "train":
                 reverse_feature = ReverseLayerF.apply(embedding_layer, alpha)
-                output_domain = self.domain_predictor(reverse_feature)
+                # output_domain = self.domain_predictor(reverse_feature)
+                output_domain = self.domain_predictor(embedding_layer)
                 return normalized_output, output_domain
 
             return normalized_output
