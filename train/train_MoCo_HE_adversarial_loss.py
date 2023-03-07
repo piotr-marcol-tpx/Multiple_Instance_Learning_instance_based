@@ -392,8 +392,8 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 		# loss_domains = lambda_val * criterion_domain(he_q, he_staining)
 		loss_domains = lambda_val * criterion_domain(he_q, domain_oh)
 
-		loss = loss_moco + loss_domains
-
+		# loss = loss_moco + loss_domains
+		loss = loss_moco
 		loss.backward()
 
 		# Encoder update
