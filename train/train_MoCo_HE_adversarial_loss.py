@@ -337,7 +337,7 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 		p = float(cont_iterations_tot + epoch * tot_iterations) / num_epochs / tot_iterations
 
 		alpha = 2. / (1. + np.exp(-10 * p)) - 1
-		alpha = alpha + grl_alpha_starting_point(1 - alpha)
+		alpha = alpha + grl_alpha_starting_point*(1 - alpha)
 
 		# Preprocess
 		# momentum_encoder.train()
