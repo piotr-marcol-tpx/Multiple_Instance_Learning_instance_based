@@ -1,8 +1,7 @@
 from torch.utils import data
 import torch
 import numpy as np
-from transform_pipelines import pipeline_transform_soft, pipeline_transform_paper, pipeline_transform, preprocess
-from train_utils import H_E_Staining
+from transform_pipelines import pipeline_transform_paper, pipeline_transform, preprocess
 import h5py
 
 
@@ -43,29 +42,13 @@ class HDF5Dataset(data.Dataset):
         domain_oh = self._hf[self.domain_gt_dataset_name][index]
         # tissue_oh = self._hf[self.tissue_gt_dataset_name][index]
 
-        h_e_matrix = np.array([0, 0, 0, 0, 0, 0])
-
         if self.mode == 'train':
-            k = patch
-            """ not using staning processing
-            b = False
-            while not b:
-                k = pipeline_transform_soft(image=k)['image']
-                try:
-                    h_e_matrix = H_E_Staining(k)
-                    b = True
-                except:
-                    pass
-                    # k = pipeline_transform_soft(image=k)['image']
-            
-            h_e_matrix = np.reshape(h_e_matrix, 6)
-            h_e_matrix = np.asarray(h_e_matrix)
-            """
-            q = pipeline_transform_paper(image=k)['image']
+            q = patch
+            k = pipeline_transform(image=q)['image']
 
         else:
-            k = patch
-            q = pipeline_transform(image=k)['image']
+            q = patch
+            k = pipeline_transform(image=q)['image']
 
         # data transformation
         q = preprocess(q).type(torch.FloatTensor)
@@ -74,9 +57,9 @@ class HDF5Dataset(data.Dataset):
 
         # return k, q, h_e_matrix, domain_oh
         if self.approach == "multiclass":
-            return k, q, domain_oh
+            return q, k, domain_oh
         elif self.approach == "binary":
-            return k, q, domain_oh[-1:]
+            return q, k, domain_oh[-1:]
 
 
 class BalancedMultimodalSampler(torch.utils.data.sampler.Sampler):

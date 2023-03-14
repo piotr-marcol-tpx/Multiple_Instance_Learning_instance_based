@@ -123,7 +123,7 @@ elif 'mobilenet' in CNN_TO_USE:
 
 
 # moco_dim = 768
-moco_dim = 512
+moco_dim = 256
 moco_m = 0.999
 temperature = 0.07
 
@@ -170,7 +170,7 @@ def loss_function(q, k, queue):
 	pos = torch.exp(torch.div(torch.bmm(q.view(N, 1, C), k.view(N, C, 1)).view(N, 1), temperature))
 	
 	# Matrix multiplication is performed between the query and the queue tensor
-	neg = torch.sum(torch.exp(torch.div(torch.mm(q.view(N, C), torch.t(queue)), temperature)), dim=1)
+	neg = torch.unsqueeze(torch.sum(torch.exp(torch.div(torch.mm(q.view(N, C), torch.t(queue)), temperature)), dim=1))
 
 	# Sum up
 	denominator = neg + pos
@@ -272,7 +272,6 @@ training_iterator = iter(training_dataloader)
 
 # Training
 print('\nStart training!')
-epoch = 0 
 
 # iterations_per_epoch = 8600
 iterations_per_epoch = int(len(training_dataset) / training_dataloader.batch_size)
@@ -282,12 +281,13 @@ losses_train = []
 # number of epochs without improvement
 EARLY_STOP_NUM = 10
 early_stop_cont = 0
-epoch = 0
 num_epochs = EPOCHS
 best_loss = 100000.0
 
 tot_iterations = num_epochs * iterations_per_epoch
 cont_iterations_tot = 0
+
+grl_alpha_starting_point = 0.3
 
 TEMPERATURE = 0.07
 
@@ -313,12 +313,10 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 	training_iterator._dataset.mode = "queue_building"
 	while queue.shape[0] < num_keys:
 		try:
-			# _, img, _, _ = next(training_iterator)
-			_, img, _ = next(training_iterator)  # not using he staining
+			_, img, _ = next(training_iterator)
 		except StopIteration:
 			training_iterator = iter(training_dataloader)
-			# _, img, _, _ = next(training_iterator)
-			_, img, _ = next(training_iterator)  # not using he staining
+			_, img, _ = next(training_iterator)
 		with torch.no_grad():
 			key_feature = momentum_encoder(img.to(device), 'valid', None)
 			queue = torch.cat([queue, key_feature])
@@ -331,16 +329,15 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 		print(f"[epoch {epoch: >4}]: iteration {i+1: >5} of {iterations_per_epoch}")
 
 		try:
-			# x_q, x_k, he_staining, domain_oh = next(training_iterator)
-			x_q, x_k, domain_oh = next(training_iterator)  # not using he staining
+			x_q, x_k, domain_oh = next(training_iterator)
 		except StopIteration:
 			training_iterator = iter(training_dataloader)
-			# x_q, x_k, he_staining, domain_oh = next(training_iterator)
-			x_q, x_k, domain_oh = next(training_iterator)  # not using he staining
+			x_q, x_k, domain_oh = next(training_iterator)
 
 		p = float(cont_iterations_tot + epoch * tot_iterations) / num_epochs / tot_iterations
 
 		alpha = 2. / (1. + np.exp(-10 * p)) - 1
+		alpha = alpha + grl_alpha_starting_point(1 - alpha)
 
 		# Preprocess
 		# momentum_encoder.train()
@@ -354,7 +351,6 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 			x_k = x_k[idx]
 
 		# x_q, x_k : (N, 3, 64, 64)
-		# x_q, x_k, he_staining = x_q.to(device), x_k.to(device), he_staining.type(torch.FloatTensor).to(device)
 		x_q, x_k, domain_oh = x_q.to(device), x_k.to(device), domain_oh.type(torch.FloatTensor).to(device)
 
 		q, he_q = encoder(x_q, "train", alpha)  # q : (N, 128)
@@ -389,7 +385,6 @@ while epoch < num_epochs and early_stop_cont < EARLY_STOP_NUM:
 		loss_moco = criterion(logits, labels)
 		"""
 		loss_moco = loss_function(q, k, queue)
-		# loss_domains = lambda_val * criterion_domain(he_q, he_staining)
 		loss_domains = lambda_val * criterion_domain(he_q, domain_oh)
 
 		loss = loss_moco + loss_domains
