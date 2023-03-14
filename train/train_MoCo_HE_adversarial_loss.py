@@ -170,7 +170,10 @@ def loss_function(q, k, queue):
 	pos = torch.exp(torch.div(torch.bmm(q.view(N, 1, C), k.view(N, C, 1)).view(N, 1), temperature))
 	
 	# Matrix multiplication is performed between the query and the queue tensor
-	neg = torch.unsqueeze(torch.sum(torch.exp(torch.div(torch.mm(q.view(N, C), torch.t(queue)), temperature)), dim=1))
+	neg = torch.unsqueeze(
+		torch.sum(torch.exp(torch.div(torch.mm(q.view(N, C), torch.t(queue)), temperature)), dim=1),
+		dim=1
+	)
 
 	# Sum up
 	denominator = neg + pos
