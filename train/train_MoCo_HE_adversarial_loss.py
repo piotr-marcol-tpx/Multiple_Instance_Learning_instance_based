@@ -123,7 +123,7 @@ elif 'mobilenet' in CNN_TO_USE:
 
 
 # moco_dim = 768
-moco_dim = 256
+moco_dim = 512
 moco_m = 0.999
 temperature = 0.07
 
@@ -189,7 +189,7 @@ if APPROACH == 'binary':
 elif APPROACH == 'multiclass':
 	criterion_domain = torch.nn.CrossEntropyLoss().to(device)
 
-lambda_val = 0.5
+lambda_val = 0.85
 
 optimizer_str = 'adam'
 
@@ -290,7 +290,7 @@ best_loss = 100000.0
 tot_iterations = num_epochs * iterations_per_epoch
 cont_iterations_tot = 0
 
-grl_alpha_starting_point = 0.1
+grl_alpha_starting_point = 0
 
 TEMPERATURE = 0.07
 
