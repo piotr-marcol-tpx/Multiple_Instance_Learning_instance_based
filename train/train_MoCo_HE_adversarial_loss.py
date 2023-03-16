@@ -189,7 +189,7 @@ if APPROACH == 'binary':
 elif APPROACH == 'multiclass':
 	criterion_domain = torch.nn.CrossEntropyLoss().to(device)
 
-lambda_val = 0.85
+lambda_val = 0.5
 
 optimizer_str = 'adam'
 
@@ -202,7 +202,7 @@ if optimizer_str == 'sgd':
 	optimizer = optim.SGD(encoder.parameters(), lr=lr, momentum=SGD_momentum, weight_decay=weight_decay)
 
 elif optimizer_str == 'adam':
-	optimizer = optim.Adam(encoder.parameters(),lr=lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=weight_decay, amsgrad=True)			
+	optimizer = optim.Adam(encoder.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=weight_decay, amsgrad=True)
 
 # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
@@ -290,7 +290,7 @@ best_loss = 100000.0
 tot_iterations = num_epochs * iterations_per_epoch
 cont_iterations_tot = 0
 
-grl_alpha_starting_point = 0
+grl_alpha_starting_point = 0.1
 
 TEMPERATURE = 0.07
 
