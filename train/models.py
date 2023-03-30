@@ -39,7 +39,7 @@ class DomainPredictor(torch.nn.Module):
 
 
 class Encoder(torch.nn.Module):
-    def __init__(self, dim, cnn_to_use, embedding_bool=True, n_domains=5):
+    def __init__(self, dim, cnn_to_use, embedding_bool=True, n_domains=3):
         """
         In the constructor we instantiate two nn.Linear modules and assign them as
         member variables.

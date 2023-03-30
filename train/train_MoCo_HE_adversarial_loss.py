@@ -36,7 +36,7 @@ parser.add_argument(
 	'-f', '--features', help='features_to_use: embedding (True) or features from CNN (False)',
 	type=str, default='True'
 )
-parser.add_argument('-q', '--MOCO_QUEUE', help='queue size for MoCo algorithm', type=int, default=16384)
+parser.add_argument('-q', '--MOCO_QUEUE', help='queue size for MoCo algorithm', type=int, default=8192)
 parser.add_argument('-l', '--lr', help='learning rate', type=float, default=1e-4)
 parser.add_argument(
 	'-p', '--BASE_PATH', help='base path', type=str, default='/projects/0/examode/MIT_PP3/MoCo_representation_training'
@@ -72,7 +72,7 @@ OUTPUT_FOLDER = args.output_folder
 OUTPUT_FOLDER = os.path.join(base_path, OUTPUT_FOLDER)
 input_filename = args.H5_INPUT
 input_path = os.path.join(base_path, input_filename)
-dataloader_num_workers = 2
+dataloader_num_workers = 4
 
 if EMBEDDING_bool == 'True':
 	EMBEDDING_bool = True
@@ -131,7 +131,7 @@ batch_size = BATCH_SIZE
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-n_domains = 1 if APPROACH == "binary" else 5
+n_domains = 1 if APPROACH == "binary" else 3
 print(f"n_domains: {n_domains}")
 
 encoder = Encoder(dim=moco_dim, cnn_to_use=CNN_TO_USE, n_domains=n_domains).to(device)
@@ -265,10 +265,15 @@ if APPROACH == "binary":
 elif APPROACH == "multiclass":
 	sampler = BalancedMultimodalSampler(classes)
 
+# dataloader_params = {
+# 	'batch_size': batch_size,
+# 	'num_workers': dataloader_num_workers,
+# 	'sampler': sampler
+# }
 dataloader_params = {
 	'batch_size': batch_size,
 	'num_workers': dataloader_num_workers,
-	'sampler': sampler
+	'shuffle': True
 }
 training_dataloader = data.DataLoader(training_dataset, **dataloader_params)
 training_iterator = iter(training_dataloader)
