@@ -265,16 +265,16 @@ if APPROACH == "binary":
 elif APPROACH == "multiclass":
 	sampler = BalancedMultimodalSampler(classes)
 
-# dataloader_params = {
-# 	'batch_size': batch_size,
-# 	'num_workers': dataloader_num_workers,
-# 	'sampler': sampler
-# }
 dataloader_params = {
 	'batch_size': batch_size,
 	'num_workers': dataloader_num_workers,
-	'shuffle': True
+	'sampler': sampler
 }
+# dataloader_params = {
+# 	'batch_size': batch_size,
+# 	'num_workers': dataloader_num_workers,
+# 	'shuffle': True
+# }
 training_dataloader = data.DataLoader(training_dataset, **dataloader_params)
 training_iterator = iter(training_dataloader)
 
