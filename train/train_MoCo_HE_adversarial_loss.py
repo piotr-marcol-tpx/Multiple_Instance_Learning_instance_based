@@ -295,7 +295,7 @@ best_loss = 100000.0
 tot_iterations = num_epochs * iterations_per_epoch
 cont_iterations_tot = 0
 
-grl_alpha_starting_point = 0.1
+grl_alpha_starting_point = 0.0
 
 TEMPERATURE = 0.07
 
