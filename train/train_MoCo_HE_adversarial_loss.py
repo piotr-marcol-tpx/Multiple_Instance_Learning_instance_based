@@ -261,7 +261,7 @@ training_dataset = HDF5Dataset(input_path, "init", approach=APPROACH)
 classes = training_dataset._hf[training_dataset.domain_gt_dataset_name][()]
 
 if APPROACH == "binary":
-	sampler = ImbalancedBinarySampler(classes)
+	sampler = BalancedBinarySampler(classes)
 elif APPROACH == "multiclass":
 	sampler = BalancedMultimodalSampler(classes)
 
